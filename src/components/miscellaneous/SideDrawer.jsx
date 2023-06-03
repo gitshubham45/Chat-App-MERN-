@@ -40,7 +40,14 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
-  const { user } = ChatState();
+  const {
+    setSelectedChat,
+    user,
+    notification,
+    setNotification,
+    chats,
+    setChats,
+  } = ChatState();
   const history = useHistory();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -78,6 +85,39 @@ const SideDrawer = () => {
       setLoading(false);
       setSearchResult(data);
     } catch (err) {
+      toast({
+        title: "Error Occured!",
+        description: "Failed to Load the Search Results",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+    }
+  }
+
+  const accessChat = async (userId) => {
+    try{
+      setLoadingChat(true);
+
+      const config = {
+        headers : {
+          "Content-Type": "application/json",
+          Authorization : `Bearer ${user.token}`,
+        }
+      };
+
+      const {data} = await axios.post("api/chat",{userId},config);
+
+      console.log(data);
+
+      if(!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+
+      setSelectedChat(data);
+      setLoadingChat(false);
+      onClose();
+
+    }catch{
       toast({
         title: "Error Occured!",
         description: "Failed to Load the Search Results",
@@ -168,10 +208,11 @@ const SideDrawer = () => {
                 <UserListItem
                   key={user._id}
                   user={user}
-                  // handleFunction={() => accessChat(user._id)}
+                  handleFunction={() => accessChat(user._id)}
                 />
               ))
             )}
+            {loadingChat && <Spinner ml="auto" display="flex" />}
           </DrawerBody>
         </DrawerContent>
       </Drawer >
