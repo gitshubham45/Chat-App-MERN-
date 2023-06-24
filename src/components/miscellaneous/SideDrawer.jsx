@@ -29,8 +29,8 @@ import ProfileModal from "./profileModal";
 // import profile from "./pml";
 // import NotificationBadge from "react-notification-badge";
 // import { Effect } from "react-notification-badge";
-// import { getSender } from "../../config/ChatLogics";
-import UserListItem from "../User Avatar/UserListItem";
+import { getSender } from "../../config/ChatLogics";
+import UserListItem from "../userAvatar/UserListItem";
 import { ChatState } from "../../Context/ChatProvider";
 
 const SideDrawer = () => {
@@ -97,27 +97,27 @@ const SideDrawer = () => {
   }
 
   const accessChat = async (userId) => {
-    try{
+    try {
       setLoadingChat(true);
 
       const config = {
-        headers : {
+        headers: {
           "Content-Type": "application/json",
-          Authorization : `Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
         }
       };
 
-      const {data} = await axios.post("api/chat",{userId},config);
+      const { data } = await axios.post("api/chat", { userId }, config);
 
       console.log(data);
 
-      if(!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+      if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
 
       setSelectedChat(data);
       setLoadingChat(false);
       onClose();
 
-    }catch{
+    } catch {
       toast({
         title: "Error Occured!",
         description: "Failed to Load the Search Results",
@@ -196,18 +196,20 @@ const SideDrawer = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               <Button
-               onClick = {handleSearch}
+                onClick={handleSearch}
               >
                 Go
               </Button>
             </Box>
             {loading ? (
               <ChatLoading />
-            ):(
+            ) : (
               searchResult?.map((user) => (
                 <UserListItem
                   key={user._id}
                   user={user}
+                  pic={user.pic}
+                  email={user.email}
                   handleFunction={() => accessChat(user._id)}
                 />
               ))
